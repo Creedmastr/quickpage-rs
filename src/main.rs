@@ -10,31 +10,31 @@ fn main() {
     }
 
     let input = std::fs::read_to_string(&args[1]).unwrap();
-
-    let mut base_file = String::new();
-    let mut body = String::new();
-
     let input = input.split(";").collect::<Vec<&str>>();
+    if !input[0].starts_with("title: ") {
+        panic!("ERROR: the page must have a title!")
+    }
+
+    let mut body = base_page::create_base_file(&input[0].replace("title: ", ""));
 
     let mut line_c: u32 = 0;
     for line in input {
         let line = line.to_string().replace("\n", "");
         match &line {
-            x if x.starts_with("title: ") => {
-                base_file = base_page::create_base_file(&x.replace("title: ", ""));
-            }
-
             x if x.starts_with("p: ") => {
                 body += &format!("<p>{}</p>", line.replace("p: ", ""));
             }
 
             _ => {
-                eprintln!("WARNING: Unknown expression at lines: {0}, '{1}', skipped", line_c, line);
+                eprintln!(
+                    "WARNING: Unknown expression at lines: {0}, '{1}', skipped",
+                    line_c, line
+                );
             }
         }
 
         line_c += 1;
     }
 
-    let _ = std::fs::write(&args[2], base_file + &body + &end_file());
+    let _ = std::fs::write(&args[2], body + &end_file());
 }
