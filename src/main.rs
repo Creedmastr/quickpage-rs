@@ -1,3 +1,5 @@
+use base_page::end_file;
+
 mod base_page;
 mod elements;
 
@@ -6,43 +8,33 @@ fn main() {
     if !args.len() < 3 {
         panic!("WRONG USAGE: qp <file> <title>");
     }
-    
+
     let input = std::fs::read_to_string(&args[1]).unwrap();
 
-    let mut base_file = &String::new();
+    let mut base_file = String::new();
+    let mut body = String::new();
 
-    let input = input.chars();
+    let input = input.split(";").collect::<Vec<&str>>();
 
-    let mut buffer = String::new();
-    let mut char_count: u32 = 0;
-    for char in input {
-        let char = char.to_string();
-
-        match char == ";" {
-            true => {
-                match &buffer {
-                    x if x == "<" || x == ">" => {
-                        buffer = String::new();
-                        continue;
-                    }
-
-                    x if x == "title" => {
-                        base_page::create_base_file(x);
-                    }
-
-                    _ => {
-                        panic!("Unknown expression at char: {0}, {1}", char_count, buffer);
-                    }
-                }
-
-                buffer = String::new();
+    let mut line_c: u32 = 0;
+    for line in input {
+        let line = line.to_string().replace("\n", "");
+        match &line {
+            x if x.starts_with("title: ") => {
+                base_file = base_page::create_base_file(&x.replace("title: ", ""));
             }
 
-            false => {
-                buffer += &char;
+            x if x.starts_with("p: ") => {
+                body += &format!("<p>{}</p>", line.replace("p: ", ""));
+            }
+
+            _ => {
+                eprintln!("WARNING: Unknown expression at lines: {0}, '{1}', skipped", line_c, line);
             }
         }
 
-        char_count += 1;
+        line_c += 1;
     }
+
+    let _ = std::fs::write(&args[2], base_file + &body + &end_file());
 }
