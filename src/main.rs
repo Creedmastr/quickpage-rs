@@ -6,7 +6,7 @@ mod elements;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
-    if args.len() > 5 {
+    if args.len() < 4 {
         panic!("WRONG USAGE: qp <file> <output> <has_css>");
     }
 
