@@ -20,7 +20,8 @@ pub fn create_base_file(title: &String) -> String {
 
 pub fn end_file() -> String {
     return String::from(
-        r#"<style>
+        r#"
+        <style>
             body {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 margin: 0;

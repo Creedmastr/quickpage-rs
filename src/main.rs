@@ -1,4 +1,5 @@
 use base_page::end_file;
+use elements::element;
 
 mod base_page;
 mod elements;
@@ -10,30 +11,27 @@ fn main() {
     }
 
     let input = std::fs::read_to_string(&args[1]).unwrap();
-    let input = input.split(";").collect::<Vec<&str>>();
+    let mut input = input.split(";").collect::<Vec<&str>>();
     if !input[0].starts_with("title: ") {
         panic!("ERROR: the page must have a title!")
     }
 
     let mut body = base_page::create_base_file(&input[0].replace("title: ", ""));
+    input[0] = "";
 
-    let mut line_c: u32 = 0;
     for line in input {
         let line = line.to_string().replace("\n", "");
-        match &line {
-            x if x.starts_with("p: ") => {
-                body += &format!("<p>{}</p>", line.replace("p: ", ""));
-            }
-
-            _ => {
-                eprintln!(
-                    "WARNING: Unknown expression at lines: {0}, '{1}', skipped",
-                    line_c, line
-                );
-            }
+        let (el, content) = line.split_once(": ").unwrap_or(("", ""));
+        if el.is_empty() && content.is_empty() {
+            continue;
         }
+        let (opt, content) = match content.contains("]]") {
+            true => content.split_once("]]").unwrap(),
+            false => ("", content),
+        };
+        let opt = opt.replace("[[", "");
 
-        line_c += 1;
+        body += &element(&el, &opt, content.to_string());
     }
 
     let _ = std::fs::write(&args[2], body + &end_file());
