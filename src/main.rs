@@ -6,8 +6,8 @@ mod elements;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
-    if !args.len() < 3 {
-        panic!("WRONG USAGE: qp <file> <title>");
+    if !args.len() < 4 {
+        panic!("WRONG USAGE: qp <file> <output> <has_css>");
     }
 
     let input = std::fs::read_to_string(&args[1]).unwrap();
@@ -33,6 +33,15 @@ fn main() {
 
         body += &element(&el, &opt, content.to_string());
     }
+    
+    match &args[3] {
+        x if x.to_lowercase() == "y" || x.to_lowercase() == "yes" => {
+            let _ = std::fs::write(&args[2], body + &end_file(true));
+        }
 
-    let _ = std::fs::write(&args[2], body + &end_file());
+        _ => {
+            let _ = std::fs::write(&args[2], body + &end_file(false));
+        }
+    }
+    
 }
